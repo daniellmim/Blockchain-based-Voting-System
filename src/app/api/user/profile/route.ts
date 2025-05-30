@@ -1,9 +1,9 @@
-
 import dbConnect from '@/lib/mongodb';
 import UserModel, { IUserDocument } from '@/models/User';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
+import { sanitizeInput } from '@/lib/utils';
 
 interface AuthenticatedRequest extends NextRequest {
   user?: { userId: string };
@@ -31,24 +31,33 @@ export async function PUT(req: AuthenticatedRequest) {
   }
 
   try {
-    const { name, username, avatarUrl } = await req.json();
+    const { name, username, avatarUrl, currentPassword } = await req.json();
     const userId = req.user.userId;
 
-    const userToUpdate = await UserModel.findById(userId);
+    // Require current password for any profile change
+    if (!currentPassword) {
+      return NextResponse.json({ message: 'Current password is required to update profile.' }, { status: 400 });
+    }
+    const userToUpdate = await UserModel.findById(userId).select('+password');
     if (!userToUpdate) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-
-    if (username && username.toLowerCase() !== userToUpdate.username.toLowerCase()) {
-      const existingUserByUsername = await UserModel.findOne({ username: username.toLowerCase() });
-      if (existingUserByUsername && !existingUserByUsername._id.equals(userToUpdate._id)) {
-        return NextResponse.json({ message: 'Username is already taken' }, { status: 409 });
-      }
-      userToUpdate.username = username.toLowerCase();
+    const isMatch = await userToUpdate.comparePassword(currentPassword);
+    if (!isMatch) {
+      return NextResponse.json({ message: 'Current password is incorrect.' }, { status: 401 });
     }
 
-    if (name) userToUpdate.name = name;
-    if (avatarUrl) userToUpdate.avatarUrl = avatarUrl;
+    // Sanitize inputs
+    if (username && username.toLowerCase() !== userToUpdate.username.toLowerCase()) {
+      const sanitizedUsername = sanitizeInput(username.toLowerCase());
+      const existingUserByUsername = await UserModel.findOne({ username: sanitizedUsername });
+      if (existingUserByUsername && String(existingUserByUsername._id) !== String(userToUpdate._id)) {
+        return NextResponse.json({ message: 'Username is already taken' }, { status: 409 });
+      }
+      userToUpdate.username = sanitizedUsername;
+    }
+    if (name) userToUpdate.name = sanitizeInput(name);
+    if (avatarUrl) userToUpdate.avatarUrl = sanitizeInput(avatarUrl);
     // Email is not updatable in this endpoint for simplicity
 
     await userToUpdate.save();

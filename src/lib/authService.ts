@@ -1,4 +1,3 @@
-
 import type { User } from './types';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
 
@@ -20,7 +19,7 @@ export const loginUser = async (email: string, password?: string): Promise<{ tok
   return data; // { token, user }
 };
 
-export const signupUser = async (name?: string, username?: string, email?: string, password?: string): Promise<{ token: string; user: User }> => {
+export const signupUser = async (name?: string, username?: string, email?: string, password?: string): Promise<{ token?: string; user?: User; suggestions?: string[] }> => {
   if (!name || !username || !email || !password) {
     throw new Error("Name, username, email, and password are required for signup.");
   }
@@ -32,12 +31,18 @@ export const signupUser = async (name?: string, username?: string, email?: strin
 
   const data = await response.json();
   if (!response.ok) {
+    // If suggestions are present, throw a custom error object
+    if (response.status === 409 && data.suggestions) {
+      const err: any = new Error(data.message || 'Signup failed');
+      err.suggestions = data.suggestions;
+      throw err;
+    }
     throw new Error(data.message || 'Signup failed');
   }
-   if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && data.token) {
     localStorage.setItem('bvs_token', data.token);
   }
-  return data; // { token, user }
+  return data; // { token, user, suggestions? }
 };
 
 export const getToken = (): string | null => {

@@ -1,4 +1,3 @@
-
 import dbConnect from '@/lib/mongodb';
 import ChatMessageModel from '@/models/ChatMessage';
 import ConversationModel from '@/models/Conversation';
@@ -35,6 +34,9 @@ export async function POST(req: AuthenticatedRequest) {
 
   try {
     const { receiverId, content, conversationId: existingConversationId } = await req.json();
+    console.log('[DEBUG] receiverId:', receiverId, 'type:', typeof receiverId);
+    console.log('[DEBUG] content:', content);
+    console.log('[DEBUG] existingConversationId:', existingConversationId, 'type:', typeof existingConversationId);
     if (!receiverId || !content) {
       return NextResponse.json({ message: 'Receiver ID and content are required' }, { status: 400 });
     }
@@ -45,37 +47,43 @@ export async function POST(req: AuthenticatedRequest) {
         return NextResponse.json({ message: 'Cannot send messages to yourself' }, { status: 400 });
     }
 
-
     const senderId = new Types.ObjectId(req.user.userId);
     const receiverObjectId = new Types.ObjectId(receiverId);
+    console.log('[DEBUG] senderId:', senderId, 'type:', typeof senderId);
+    console.log('[DEBUG] receiverObjectId:', receiverObjectId, 'type:', typeof receiverObjectId);
 
     let conversation;
     if (existingConversationId && Types.ObjectId.isValid(existingConversationId)) {
         conversation = await ConversationModel.findById(existingConversationId);
+        console.log('[DEBUG] Conversation by ID:', conversation);
     }
     
     if (!conversation) {
-      // Find or create conversation
-      conversation = await ConversationModel.findOneAndUpdate(
-        {
-          participants: { $all: [senderId, receiverObjectId], $size: 2 },
-        },
-        {
-          $setOnInsert: { participants: [senderId, receiverObjectId] },
-        },
-        { upsert: true, new: true }
-      );
+      // First, try to find an existing conversation
+      conversation = await ConversationModel.findOne({
+        participants: { $all: [senderId, receiverObjectId], $size: 2 },
+      });
+      console.log('[DEBUG] Conversation by participants (findOne):', conversation);
+      // If not found, create a new conversation
+      if (!conversation) {
+        conversation = await ConversationModel.create({
+          participants: [senderId, receiverObjectId],
+          lastMessage: null,
+        });
+        console.log('[DEBUG] Conversation created:', conversation);
+      }
     }
     
     if (!conversation) { // Should not happen with upsert true
+        console.error('[ERROR] Could not find or create conversation', { senderId, receiverObjectId });
         return NextResponse.json({ message: 'Could not find or create conversation' }, { status: 500 });
     }
     
     // Ensure current user is part of this conversation
     if (!conversation.participants.some(pId => pId.equals(senderId))) {
+        console.error('[ERROR] User not part of conversation', { senderId, conversation });
         return NextResponse.json({ message: 'You are not part of this conversation' }, { status: 403 });
     }
-
 
     const newMessage = new ChatMessageModel({
       conversationId: conversation._id,
@@ -84,18 +92,18 @@ export async function POST(req: AuthenticatedRequest) {
       isReadBy: [senderId], // Sender has "read" it
     });
     await newMessage.save();
+    console.log('[DEBUG] New message saved:', newMessage);
 
     // Update conversation's last message and updatedAt timestamp
     conversation.lastMessage = newMessage._id;
     conversation.updatedAt = new Date();
     await conversation.save();
+    console.log('[DEBUG] Conversation updated with lastMessage:', conversation);
 
     // Populate sender details for the response
     const populatedMessage = await ChatMessageModel.findById(newMessage._id)
         .populate('senderId', 'id name username avatarUrl');
-
-    // TODO: Real-time: Emit message via WebSockets to receiverId
-    // TODO: Create a 'new_chat_message' notification for the receiverId (careful about spamming)
+    console.log('[DEBUG] Populated message:', populatedMessage);
 
     return NextResponse.json({ message: 'Message sent successfully', chatMessage: populatedMessage, conversationId: conversation.id }, { status: 201 });
 

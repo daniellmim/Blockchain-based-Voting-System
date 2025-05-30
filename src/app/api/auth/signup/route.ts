@@ -45,11 +45,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User already exists with this email' }, { status: 409 });
     }
 
-    console.log('[SIGNUP_API_LOG] Checking for existing user by username:', username.toLowerCase());
-    existingUser = await UserModel.findOne({ username: username.toLowerCase() });
-    if (existingUser) {
-      console.log('[SIGNUP_API_LOG] Username is already taken.');
-      return NextResponse.json({ message: 'Username is already taken' }, { status: 409 });
+    // Check for existing username and suggest alternatives if taken
+    let suggestedUsername = username.toLowerCase();
+    let usernameTaken = await UserModel.findOne({ username: suggestedUsername });
+    if (usernameTaken) {
+      // Suggest up to 5 alternatives
+      let suggestions: string[] = [];
+      for (let i = 1; i <= 5; i++) {
+        const alt = `${suggestedUsername}${Math.floor(Math.random() * 10000)}`;
+        if (!(await UserModel.findOne({ username: alt }))) {
+          suggestions.push(alt);
+        }
+        if (suggestions.length >= 3) break;
+      }
+      return NextResponse.json({
+        message: 'Username is already taken',
+        suggestions
+      }, { status: 409 });
     }
 
     console.log('[SIGNUP_API_LOG] Creating new user instance...');
