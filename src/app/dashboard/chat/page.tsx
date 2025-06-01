@@ -959,6 +959,13 @@ export default function ChatPage() {
     setActiveConversationId(null);
   };
 
+  // Fetch conversations on initial load and when user/token changes
+  useEffect(() => {
+    if (currentUser && token) {
+      fetchConversations();
+    }
+  }, [currentUser, token, fetchConversations]);
+
   if (authLoading || !currentUser) {
     return (
       <div className="flex-1 flex items-center justify-center h-full">
