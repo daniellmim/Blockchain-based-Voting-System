@@ -1,6 +1,5 @@
-
 import dbConnect from '@/lib/mongodb';
-import UserModel from '@/models/User';
+import UserModel from '@/models/User'; // Ensure User model is registered
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 

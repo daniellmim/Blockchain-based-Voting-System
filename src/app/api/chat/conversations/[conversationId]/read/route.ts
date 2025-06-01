@@ -26,7 +26,7 @@ async function authenticate(req: AuthenticatedRequest) {
 // POST to mark messages as read
 export async function POST(req: AuthenticatedRequest, { params }: { params: { conversationId: string } }) {
   await dbConnect();
-  const { conversationId } = params;
+  const { conversationId } = await params;
 
   const isAuthenticated = await authenticate(req);
   if (!isAuthenticated || !req.user) {

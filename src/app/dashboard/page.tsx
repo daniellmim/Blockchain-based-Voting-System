@@ -187,7 +187,7 @@ export default function DashboardPage() {
 
         <div className="flex justify-center mb-8 max-w-md sm:max-w-lg md:max-w-xl mx-auto">
           <Image
-            src="/images/dashboard-illustration.png"
+            src="/images/dashboard-illustration.gif"
             alt="Dashboard Illustration"
             width={600}
             height={300}

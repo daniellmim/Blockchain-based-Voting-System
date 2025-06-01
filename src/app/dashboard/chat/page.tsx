@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import io from "socket.io-client";
 
 interface SocketNewMessagePayload {
   conversationId: string;
@@ -634,6 +635,7 @@ export default function ChatPage() {
   const { toast } = useToast();
   const [showChatViewMobile, setShowChatViewMobile] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const socketRef = useRef<any>(null);
 
   const getRoomNameById = useCallback(
     async (roomId: string): Promise<string> => {
@@ -756,23 +758,31 @@ export default function ChatPage() {
     }
   }, [activeConversationId, currentUser, fetchMessages]);
 
-  // Poll for new messages and conversations every 3 seconds
+  // --- SOCKET.IO INTEGRATION ---
   useEffect(() => {
     if (!currentUser || !token) return;
-    const pollInterval = setInterval(() => {
-      fetchConversations();
-      if (activeConversationId && isValidObjectId(activeConversationId)) {
-        fetchMessages(activeConversationId);
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL, {
+        auth: { token },
+        query: { userId: currentUser.id },
+        transports: ["websocket"],
+      });
+    }
+    const socket = socketRef.current;
+    socket.on("newMessage", (payload: any) => {
+      if (payload.conversationId === activeConversationId) {
+        setMessages((prev) => [...prev, payload.message]);
       }
-    }, 3000); // Poll every 3 seconds
-    return () => clearInterval(pollInterval);
-  }, [
-    currentUser,
-    token,
-    activeConversationId,
-    fetchConversations,
-    fetchMessages,
-  ]);
+      fetchConversations();
+    });
+    socket.on("conversationUpdated", () => {
+      fetchConversations();
+    });
+    return () => {
+      socket.off("newMessage");
+      socket.off("conversationUpdated");
+    };
+  }, [currentUser, token, activeConversationId, fetchConversations]);
 
   const handleSearchInputChange = (value: string) => {
     setSearchInput(value);
@@ -824,7 +834,6 @@ export default function ChatPage() {
     async (content: string, receiverId: string, conversationId?: string) => {
       if (currentUser && token) {
         try {
-          // Only include conversationId if it's a valid MongoDB ObjectId (24 hex chars)
           const isValidObjectId = (id?: string) =>
             !!id && /^[a-fA-F0-9]{24}$/.test(id);
           const body: any = { receiverId, content };
@@ -844,7 +853,14 @@ export default function ChatPage() {
             throw new Error(errorData.message || "Failed to send message");
           }
           const data = await response.json();
-          // Return conversationId for chaining
+          // Emit to socket for real-time update
+          if (socketRef.current) {
+            socketRef.current.emit("sendMessage", {
+              conversationId: data.conversationId || activeConversationId,
+              message: data.message,
+              toUserId: receiverId,
+            });
+          }
           fetchMessages(data.conversationId || activeConversationId!);
           fetchConversations();
           return data.conversationId || activeConversationId!;
@@ -889,19 +905,27 @@ export default function ChatPage() {
         if (existingConvo) {
           setActiveConversationId(existingConvo.id);
         } else {
-          // Send a 'hi' message to create the conversation in the DB
-          const newConversationId = await handleSendMessage(
-            "hi",
-            targetUser.id
-          );
-          if (newConversationId) {
-            setActiveConversationId(newConversationId);
-            await fetchMessages(newConversationId);
-          }
-          toast({
-            title: "New Chat",
-            description: `Started a chat with ${targetUser.name}. Say hi!`,
+          // Create a new conversation in the backend (without sending a message)
+          const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ participantId: targetUser.id }),
           });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message || "Failed to create conversation"
+            );
+          }
+          const data = await response.json();
+          if (data.conversationId) {
+            setActiveConversationId(data.conversationId);
+            await fetchConversations();
+            await fetchMessages(data.conversationId);
+          }
         }
       } catch (error: any) {
         toast({
@@ -921,7 +945,6 @@ export default function ChatPage() {
       toast,
       conversations,
       fetchConversations,
-      handleSendMessage,
       fetchMessages,
     ]
   );

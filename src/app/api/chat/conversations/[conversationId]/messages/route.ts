@@ -1,7 +1,7 @@
-
 import dbConnect from '@/lib/mongodb';
 import ChatMessageModel from '@/models/ChatMessage';
 import ConversationModel from '@/models/Conversation';
+import UserModel from '@/models/User'; // Ensure User model is registered
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
@@ -25,7 +25,7 @@ async function authenticate(req: AuthenticatedRequest) {
 
 export async function GET(req: AuthenticatedRequest, { params }: { params: { conversationId: string } }) {
   await dbConnect();
-  const { conversationId } = params;
+  const { conversationId } = await params;
 
   const isAuthenticated = await authenticate(req);
   if (!isAuthenticated || !req.user) {

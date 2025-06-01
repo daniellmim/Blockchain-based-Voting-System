@@ -1,7 +1,6 @@
-
 import dbConnect from '@/lib/mongodb';
 import ConversationModel from '@/models/Conversation';
-import UserModel from '@/models/User';
+import UserModel from '@/models/User'; // Ensure User model is registered
 import ChatMessageModel from '@/models/ChatMessage';
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
@@ -65,5 +64,35 @@ export async function GET(req: AuthenticatedRequest) {
   } catch (error: any) {
     console.error('Get Conversations Error:', error);
     return NextResponse.json({ message: 'Failed to fetch conversations', error: error.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: AuthenticatedRequest) {
+  await dbConnect();
+  const isAuthenticated = await authenticate(req);
+  if (!isAuthenticated || !req.user) {
+    return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
+  }
+  try {
+    const { participantId } = await req.json();
+    if (!participantId || participantId === req.user.userId) {
+      return NextResponse.json({ message: 'Invalid participant' }, { status: 400 });
+    }
+    const userId = new Types.ObjectId(req.user.userId);
+    const otherId = new Types.ObjectId(participantId);
+    // Check for existing conversation
+    let conversation = await ConversationModel.findOne({
+      participants: { $all: [userId, otherId], $size: 2 },
+    });
+    if (!conversation) {
+      conversation = await ConversationModel.create({
+        participants: [userId, otherId],
+        lastMessage: null,
+      });
+    }
+    return NextResponse.json({ conversationId: conversation._id.toString() }, { status: 200 });
+  } catch (error: any) {
+    console.error('Create Conversation Error:', error);
+    return NextResponse.json({ message: 'Failed to create conversation', error: error.message }, { status: 500 });
   }
 }
