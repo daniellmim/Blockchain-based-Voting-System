@@ -131,7 +131,9 @@ function ChatMessageBubble({
   );
 
   const formatTimestamp = (timestamp: string) => {
+    if (!timestamp) return "";
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return ""; // Guard against invalid date
     if (isToday(date)) return format(date, "p");
     if (isYesterday(date)) return `Yesterday ${format(date, "p")}`;
     return format(date, "MMM d, p");
@@ -331,9 +333,13 @@ function ActiveChatView({
             No messages yet. Start the conversation!
           </p>
         ) : (
-          messages.map((msg) => (
+          messages.map((msg, idx) => (
             <ChatMessageBubble
-              key={msg.id}
+              key={
+                (msg.id && String(msg.id)) ||
+                (msg._id && String(msg._id)) ||
+                `${msg.senderId}-${msg.createdAt}-${idx}`
+              }
               message={msg}
               isSender={
                 (msg.senderId as User)?.id === currentUser.id ||
@@ -861,8 +867,7 @@ export default function ChatPage() {
               toUserId: receiverId,
             });
           }
-          fetchMessages(data.conversationId || activeConversationId!);
-          fetchConversations();
+          // Do NOT call fetchMessages or fetchConversations here; rely on socket events for real-time updates
           return data.conversationId || activeConversationId!;
         } catch (error: any) {
           toast({
@@ -875,14 +880,7 @@ export default function ChatPage() {
       }
       return null;
     },
-    [
-      currentUser,
-      token,
-      toast,
-      fetchConversations,
-      fetchMessages,
-      activeConversationId,
-    ]
+    [currentUser, token, toast, activeConversationId]
   );
 
   const handleSelectUserFromSearch = useCallback(
