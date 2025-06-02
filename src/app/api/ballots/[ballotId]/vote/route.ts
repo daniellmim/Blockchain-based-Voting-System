@@ -74,18 +74,28 @@ export async function POST(req: AuthenticatedRequest, { params }: { params: { ba
         console.log(`[API_VOTE_POST] Room not found for ID: ${roomId}`);
         return NextResponse.json({ message: 'Room not found, cannot verify membership.' }, { status: 404 });
     }
-    if (!room.members.some(member => member.userId.equals(new Types.ObjectId(userId)))) {
+    // Fix: add type for member
+    if (!room.members.some((member: { userId: any }) => member.userId.equals(new Types.ObjectId(userId)))) {
         console.log(`[API_VOTE_POST] User ${userId} is not a member of room ${roomId}`);
         return NextResponse.json({ message: 'You must be a member of the room to vote' }, { status: 403 });
     }
     console.log(`[API_VOTE_POST] User ${userId} is a member of room ${roomId}.`);
 
     const now = new Date();
-    if (ballot.startTime && ballot.startTime > now) {
+    // Fix: ensure ballot.startTime and ballot.endTime are Date objects and not undefined
+    let ballotStartTime: Date | undefined = undefined;
+    let ballotEndTime: Date | undefined = undefined;
+    if (ballot.startTime) {
+      ballotStartTime = typeof ballot.startTime === 'string' ? new Date(ballot.startTime) : ballot.startTime;
+    }
+    if (ballot.endTime) {
+      ballotEndTime = typeof ballot.endTime === 'string' ? new Date(ballot.endTime) : ballot.endTime;
+    }
+    if (ballot.startTime && ballotStartTime && ballotStartTime > now) {
       console.log(`[API_VOTE_POST] Voting has not started yet. Start time: ${ballot.startTime}`);
       return NextResponse.json({ message: 'Voting has not started yet' }, { status: 400 });
     }
-    if (ballot.endTime && ballot.endTime < now) {
+    if (ballot.endTime && ballotEndTime && ballotEndTime < now) {
       console.log(`[API_VOTE_POST] Voting has ended. End time: ${ballot.endTime}`);
       return NextResponse.json({ message: 'Voting has ended' }, { status: 400 });
     }
@@ -146,10 +156,18 @@ export async function POST(req: AuthenticatedRequest, { params }: { params: { ba
 
     // Blockchain integration: cast vote on blockchain
     try {
-      // Only support single choice for blockchain call (for now)
-      const blockchainChoiceId = Array.isArray(newSelectedIdsArray) ? newSelectedIdsArray[0] : newSelectedIdsArray;
-      await castVoteOnBlockchain(roomId, ballotId, userId, blockchainChoiceId);
-      console.log('[API_VOTE_POST] Vote also cast on blockchain.');
+      const blockchainRoomId = ballot.roomId.toString();
+      if (Array.isArray(newSelectedIdsArray) && newSelectedIdsArray.length > 1) {
+        // For multi-choice, cast a vote for each selected choice
+        for (const choiceId of newSelectedIdsArray) {
+          await castVoteOnBlockchain(blockchainRoomId, ballotId, userId, choiceId);
+        }
+        console.log('[API_VOTE_POST] Multi-choice votes cast on blockchain.');
+      } else {
+        // Single choice
+        await castVoteOnBlockchain(blockchainRoomId, ballotId, userId, newSelectedIdsArray[0]);
+        console.log('[API_VOTE_POST] Single vote cast on blockchain.');
+      }
     } catch (err) {
       console.error('[API_VOTE_POST] Failed to cast vote on blockchain:', err);
     }
