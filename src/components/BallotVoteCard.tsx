@@ -35,6 +35,7 @@ import { BallotAnalyticsDialog } from "./BallotAnalyticsDialog";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
+import { isBlockchainLive } from "@/lib/blockchainApi";
 
 interface BallotVoteCardProps {
   ballot: BallotType;
@@ -243,8 +244,23 @@ export function BallotVoteCard({ ballot, onVote, now }: BallotVoteCardProps) {
     }
     setIsSubmittingVote(true);
     try {
+      // Check if blockchain is live before voting
+      const blockchainLive = await isBlockchainLive(ballot.roomId as string);
+      if (!blockchainLive) {
+        toast({
+          variant: "destructive",
+          title: "Blockchain Not Available",
+          description:
+            "Voting is currently unavailable because the blockchain is not live.",
+        });
+        setIsSubmittingVote(false);
+        setShowVoteConfirmDialog(false);
+        return;
+      }
+      // Blockchain is live, proceed to cast vote
       await onVote(ballot.id, choicesToSubmit, ballot.roomId as string);
-    } catch (error) {
+      // Only after a 200 response from blockchain, the parent onVote should update DB and UI
+    } catch (error: any) {
       // Error toast is handled by parent (RoomPage)
     } finally {
       setIsSubmittingVote(false);

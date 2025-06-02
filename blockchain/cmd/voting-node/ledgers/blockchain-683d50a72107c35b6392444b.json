@@ -42,5 +42,16 @@
     "prevHash": "0000a6b8b04e0aa98b4d264d60d3861a42a505133c2f23eec03a64af247df66f",
     "hash": "00005a4b62cc429b3208bfdee11b64274003ab14a61ce42095914c11999c100e",
     "nonce": 668415617582807050
+  },
+  {
+    "index": 4,
+    "timestamp": 1748856068,
+    "data": {
+      "ballotId": "683d6c8718280798bfdb7163",
+      "choiceId": "683d6c8718280798bfdb7164"
+    },
+    "prevHash": "00005a4b62cc429b3208bfdee11b64274003ab14a61ce42095914c11999c100e",
+    "hash": "000043714bbbba261afbde57c293ee5e272bb3a69c3b73a4ddefdc0e2610d2b8",
+    "nonce": 4603941474084509987
   }
 ]

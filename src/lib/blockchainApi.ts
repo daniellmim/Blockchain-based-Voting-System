@@ -70,3 +70,19 @@ export const getResultsFromBlockchain = async (roomId: String, ballotId: String)
     throw error;
   }
 };
+
+// Check if blockchain is live (valid and not empty) for a room
+export const isBlockchainLive = async (roomId: string): Promise<boolean> => {
+  try {
+    const res = await axios.get(`${BLOCKCHAIN_API_URL}/api/ledger?roomId=${roomId}`);
+    const chain = res.data;
+    // Consider blockchain live if it has at least 1 block and each block has required fields
+    if (Array.isArray(chain) && chain.length > 0 && chain[0].hash && chain[0].index === 0) {
+      // Optionally, more validation can be added here
+      return true;
+    }
+    return false;
+  } catch (err) {
+    return false;
+  }
+};
