@@ -105,6 +105,7 @@ export function BallotVoteCard({ ballot, onVote, now }: BallotVoteCardProps) {
     }
   }, [limitReachedToastMessage, toast]);
 
+  // Fix: Don't reset selectedCheckboxChoiceIds on every render if userHasVoted is false
   useEffect(() => {
     const currentTime = now || new Date();
     let statusMsg = "";
@@ -139,8 +140,9 @@ export function BallotVoteCard({ ballot, onVote, now }: BallotVoteCardProps) {
         setSelectedRadioChoiceId(userVotedChoiceOrIds);
       }
     } else {
-      setSelectedRadioChoiceId(null);
-      setSelectedCheckboxChoiceIds([]);
+      // Only reset if ballot.id changes (not on every render)
+      // setSelectedRadioChoiceId(null);
+      // setSelectedCheckboxChoiceIds([]);
     }
   }, [
     ballot.startTime,
@@ -158,20 +160,28 @@ export function BallotVoteCard({ ballot, onVote, now }: BallotVoteCardProps) {
 
   const handleCheckboxChange = (choiceId: string, checked: boolean) => {
     setSelectedCheckboxChoiceIds((prev) => {
+      let updated;
       if (checked) {
         if (prev.length < maxChoices) {
-          return [...prev, choiceId];
+          updated = [...prev, choiceId];
         } else {
           setLimitReachedToastMessage(
             `You can select up to ${maxChoices} choice${
               maxChoices !== 1 ? "s" : ""
             }.`
           );
-          return prev;
+          updated = prev;
         }
       } else {
-        return prev.filter((id) => id !== choiceId);
+        updated = prev.filter((id) => id !== choiceId);
       }
+      // Debug: log updated selection
+      console.log("[BallotVoteCard] Checkbox change:", {
+        choiceId,
+        checked,
+        updated,
+      });
+      return updated;
     });
   };
 

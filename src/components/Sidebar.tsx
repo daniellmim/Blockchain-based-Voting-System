@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -27,7 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 export function Sidebar() {
   const router = useRouter();
@@ -35,55 +34,59 @@ export function Sidebar() {
   const { currentUser, logoutUser, isLoading: authLoading, token } = useAuth(); // Added token
   const [isClient, setIsClient] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
-  const [totalUnreadChatCount, setTotalUnreadChatCount] = useState(0); 
+  const [totalUnreadChatCount, setTotalUnreadChatCount] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const fetchNotificationCount = useCallback(async () => {
-    if (currentUser && token && isClient) { // check isClient here too
+    if (currentUser && token && isClient) {
+      // check isClient here too
       try {
-        const response = await fetch(`${API_BASE_URL}/notifications`, { 
-            headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(`${API_BASE_URL}/notifications`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (response.ok) {
           const data = await response.json();
           setUnreadNotificationsCount(data.unreadCount || 0);
         } else {
-            setUnreadNotificationsCount(0); // Reset on error
+          setUnreadNotificationsCount(0); // Reset on error
         }
       } catch (error) {
         console.error("Failed to fetch unread notification count", error);
         setUnreadNotificationsCount(0);
       }
     } else {
-        setUnreadNotificationsCount(0);
+      setUnreadNotificationsCount(0);
     }
   }, [currentUser, token, isClient]); // Added isClient
 
-
   const fetchChatCount = useCallback(async () => {
-     if (currentUser && token && isClient) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/chat/conversations`, { // Assuming this endpoint returns unread summary or recalculate from all convos
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                // Sum up unread counts from each conversation
-                const totalUnread = data.conversations.reduce((sum: number, convo: any) => sum + (convo.unreadCount || 0), 0);
-                setTotalUnreadChatCount(totalUnread);
-            } else {
-                 setTotalUnreadChatCount(0);
-            }
-        } catch (error) {
-            console.error("Failed to fetch unread chat count:", error);
-            setTotalUnreadChatCount(0);
+    if (currentUser && token && isClient) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/chat/conversations`, {
+          // Assuming this endpoint returns unread summary or recalculate from all convos
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Sum up unread counts from each conversation
+          const totalUnread = data.conversations.reduce(
+            (sum: number, convo: any) => sum + (convo.unreadCount || 0),
+            0
+          );
+          setTotalUnreadChatCount(totalUnread);
+        } else {
+          setTotalUnreadChatCount(0);
         }
-     } else {
+      } catch (error) {
+        console.error("Failed to fetch unread chat count:", error);
         setTotalUnreadChatCount(0);
-     }
+      }
+    } else {
+      setTotalUnreadChatCount(0);
+    }
   }, [currentUser, token, isClient]);
 
   useEffect(() => {
@@ -100,7 +103,6 @@ export function Sidebar() {
       return () => clearInterval(intervalId); // Cleanup interval on component unmount
     }
   }, [currentUser, isClient, fetchNotificationCount, fetchChatCount]);
-
 
   const handleLogout = () => {
     logoutUser();
@@ -120,11 +122,14 @@ export function Sidebar() {
 
   if (!isClient || authLoading || !currentUser) {
     // Avoid rendering the full sidebar or making API calls until client is mounted and user is loaded
-    return <div className="w-64 bg-muted p-4 h-full">Loading sidebar...</div>; 
+    return <div className="w-64 bg-muted p-4 h-full">Loading sidebar...</div>;
   }
 
-  const isActive = (path: string) => pathname === path || (pathname.startsWith(path) && path !== "/dashboard" && !(path === "/dashboard" && pathname.startsWith("/dashboard/room")));
-
+  const isActive = (path: string) =>
+    pathname === path ||
+    (pathname.startsWith(path) &&
+      path !== "/dashboard" &&
+      !(path === "/dashboard" && pathname.startsWith("/dashboard/room")));
 
   return (
     <div className="w-64 bg-gradient-to-r from-muted/80 to-blue-100/80 dark:from-muted/90 dark:to-blue-900/90 p-4 h-full flex flex-col shadow-lg md:rounded-r-lg md:fixed md:top-0 md:left-0">
@@ -132,11 +137,24 @@ export function Sidebar() {
         <Logo />
       </div>
 
-      <nav className="mb-6 flex-grow overflow-y-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <nav
+        className="mb-6 flex-grow overflow-y-auto"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         <ul className="space-y-1">
           <li>
             <Button
-              variant={isActive("/dashboard") && !pathname.startsWith("/dashboard/room") && !pathname.startsWith("/dashboard/create-room") && !pathname.startsWith("/dashboard/profile") && !pathname.startsWith("/dashboard/settings") && !pathname.startsWith("/dashboard/notifications") && !pathname.startsWith("/dashboard/chat") ? "secondary" : "ghost"}
+              variant={
+                isActive("/dashboard") &&
+                !pathname.startsWith("/dashboard/room") &&
+                !pathname.startsWith("/dashboard/create-room") &&
+                !pathname.startsWith("/dashboard/profile") &&
+                !pathname.startsWith("/dashboard/settings") &&
+                !pathname.startsWith("/dashboard/notifications") &&
+                !pathname.startsWith("/dashboard/chat")
+                  ? "secondary"
+                  : "ghost"
+              }
               className="w-full justify-start"
               asChild
             >
@@ -144,14 +162,26 @@ export function Sidebar() {
                 <Home
                   className={cn(
                     "mr-3 h-5 w-5",
-                    isActive("/dashboard") && !pathname.startsWith("/dashboard/room") && !pathname.startsWith("/dashboard/create-room") && !pathname.startsWith("/dashboard/profile") && !pathname.startsWith("/dashboard/settings") && !pathname.startsWith("/dashboard/notifications") && !pathname.startsWith("/dashboard/chat")
+                    isActive("/dashboard") &&
+                      !pathname.startsWith("/dashboard/room") &&
+                      !pathname.startsWith("/dashboard/create-room") &&
+                      !pathname.startsWith("/dashboard/profile") &&
+                      !pathname.startsWith("/dashboard/settings") &&
+                      !pathname.startsWith("/dashboard/notifications") &&
+                      !pathname.startsWith("/dashboard/chat")
                       ? "text-secondary-foreground"
                       : "text-primary"
                   )}
                 />
                 <span
                   className={cn(
-                    isActive("/dashboard") && !pathname.startsWith("/dashboard/room") && !pathname.startsWith("/dashboard/create-room") && !pathname.startsWith("/dashboard/profile") && !pathname.startsWith("/dashboard/settings") && !pathname.startsWith("/dashboard/notifications") && !pathname.startsWith("/dashboard/chat")
+                    isActive("/dashboard") &&
+                      !pathname.startsWith("/dashboard/room") &&
+                      !pathname.startsWith("/dashboard/create-room") &&
+                      !pathname.startsWith("/dashboard/profile") &&
+                      !pathname.startsWith("/dashboard/settings") &&
+                      !pathname.startsWith("/dashboard/notifications") &&
+                      !pathname.startsWith("/dashboard/chat")
                       ? "text-secondary-foreground"
                       : "text-foreground"
                   )}
@@ -192,7 +222,7 @@ export function Sidebar() {
                   <li>
                     <Button
                       variant={
-                         pathname.startsWith("/dashboard/room")
+                        pathname.startsWith("/dashboard/room")
                           ? "secondary"
                           : "ghost"
                       }
@@ -203,7 +233,7 @@ export function Sidebar() {
                       <Link href="/dashboard">
                         <span
                           className={cn(
-                             pathname.startsWith("/dashboard/room")
+                            pathname.startsWith("/dashboard/room")
                               ? "text-secondary-foreground"
                               : "text-foreground"
                           )}
@@ -256,11 +286,16 @@ export function Sidebar() {
 
           <li>
             <Button
-              variant={isActive("/dashboard/notifications") ? "secondary" : "ghost"}
+              variant={
+                isActive("/dashboard/notifications") ? "secondary" : "ghost"
+              }
               className="w-full justify-start"
               asChild
             >
-              <Link href="/dashboard/notifications" className="flex items-center justify-between w-full">
+              <Link
+                href="/dashboard/notifications"
+                className="flex items-center justify-between w-full"
+              >
                 <div className="flex items-center">
                   <Bell
                     className={cn(
@@ -281,41 +316,56 @@ export function Sidebar() {
                   </span>
                 </div>
                 {unreadNotificationsCount > 0 && (
-                  <Badge variant={isActive("/dashboard/notifications") ? "default" : "destructive"} className="h-5 px-1.5 text-xs">
+                  <Badge
+                    variant={
+                      isActive("/dashboard/notifications")
+                        ? "default"
+                        : "destructive"
+                    }
+                    className="h-5 px-1.5 text-xs"
+                  >
                     {unreadNotificationsCount}
                   </Badge>
                 )}
               </Link>
             </Button>
           </li>
-         <li>
+          <li>
             <Button
               variant={isActive("/dashboard/chat") ? "secondary" : "ghost"}
               className="w-full justify-start"
               asChild
             >
-              <Link href="/dashboard/chat" className="flex items-center justify-between w-full">
-                 <div className="flex items-center">
-                    <MessageSquare
+              <Link
+                href="/dashboard/chat"
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center">
+                  <MessageSquare
                     className={cn(
-                        "mr-3 h-5 w-5",
-                        isActive("/dashboard/chat")
+                      "mr-3 h-5 w-5",
+                      isActive("/dashboard/chat")
                         ? "text-secondary-foreground"
                         : "text-primary"
                     )}
-                    />
-                    <span
+                  />
+                  <span
                     className={cn(
-                        isActive("/dashboard/chat")
+                      isActive("/dashboard/chat")
                         ? "text-secondary-foreground"
                         : "text-foreground"
                     )}
-                    >
+                  >
                     Chat
-                    </span>
+                  </span>
                 </div>
                 {totalUnreadChatCount > 0 && (
-                  <Badge variant={isActive("/dashboard/chat") ? "default" : "destructive"} className="h-5 px-1.5 text-xs">
+                  <Badge
+                    variant={
+                      isActive("/dashboard/chat") ? "default" : "destructive"
+                    }
+                    className="h-5 px-1.5 text-xs"
+                  >
                     {totalUnreadChatCount}
                   </Badge>
                 )}
@@ -371,14 +421,30 @@ export function Sidebar() {
           </li>
           <li>
             <Button
-              variant="ghost"
+              variant={
+                isActive("/dashboard/help-support") ? "secondary" : "ghost"
+              }
               className="w-full justify-start"
               asChild
-              disabled
             >
-              <Link href="/dashboard/help">
-                <HelpCircle className="text-primary mr-3 h-5 w-5" />
-                <span className="text-muted-foreground">Help & Support</span>
+              <Link href="/dashboard/help-support">
+                <HelpCircle
+                  className={cn(
+                    "mr-3 h-5 w-5",
+                    isActive("/dashboard/help-support")
+                      ? "text-secondary-foreground"
+                      : "text-primary"
+                  )}
+                />
+                <span
+                  className={cn(
+                    isActive("/dashboard/help-support")
+                      ? "text-secondary-foreground"
+                      : "text-foreground"
+                  )}
+                >
+                  About Us
+                </span>
               </Link>
             </Button>
           </li>
@@ -397,7 +463,7 @@ export function Sidebar() {
             <Avatar className="h-10 w-10 mr-2">
               <AvatarImage
                 src={currentUser.avatarUrl}
-                alt={currentUser.name || 'User Avatar'}
+                alt={currentUser.name || "User Avatar"}
                 data-ai-hint="profile avatar"
               />
               <AvatarFallback>{getInitials(currentUser.name)}</AvatarFallback>
