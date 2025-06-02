@@ -274,9 +274,9 @@ export function Sidebar() {
                       className="w-full justify-start"
                       disabled
                     >
-                      <span className="text-muted-foreground">
+                      {/* <span className="text-muted-foreground">
                         Archived Rooms
-                      </span>
+                      </span> */}
                     </Button>
                   </li>
                 </ul>
@@ -379,10 +379,10 @@ export function Sidebar() {
               asChild
               disabled
             >
-              <Link href="/dashboard/analytics">
+              {/* <Link href="/dashboard/analytics">
                 <LineChart className="text-primary mr-3 h-5 w-5" />
                 <span className="text-muted-foreground">Analytics</span>
-              </Link>
+              </Link> */}
             </Button>
           </li>
         </ul>
