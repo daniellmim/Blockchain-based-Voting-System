@@ -41,14 +41,13 @@ export const createBallotOnBlockchain = async (
 export const castVoteOnBlockchain = async (
   roomId: string,
   ballotId: string,
-  userId: string,
+  userId: string, // keep for function signature compatibility
   choiceId: string | number
 ) => {
   try {
     const response = await axios.post(`${BLOCKCHAIN_API_URL}/api/vote`, {
       roomId,
       ballotId,
-      userId,
       choiceId: String(choiceId),
     });
     return response.data;

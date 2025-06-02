@@ -156,7 +156,6 @@ func castVoteHandler(w http.ResponseWriter, r *http.Request) {
 		Timestamp: time.Now().Unix(),
 		Data: block.VoteData{
 			BallotID: req.BallotID,
-			// UserID:   req.UserID,
 			ChoiceID: req.ChoiceID,
 		},
 		PrevHash: lastBlock.Hash,
@@ -176,7 +175,7 @@ func castVoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Broadcast the entire blockchain to peers 
+	// Broadcast the entire blockchain to peers
 	for _, peer := range network.KnownNodes {
 		if peer != nodeAddress {
 			// Send the full blockchain for this room to the peer
