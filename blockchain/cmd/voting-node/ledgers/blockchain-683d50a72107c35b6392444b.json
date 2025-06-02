@@ -1,0 +1,46 @@
+[
+  {
+    "index": 0,
+    "timestamp": 1748848808,
+    "data": {
+      "ballotId": "genesis",
+      "choiceId": "genesis"
+    },
+    "prevHash": "0",
+    "hash": "000015f7ae2ccc448acde31f810536013a9c833b1124a61aaf8accd97882c3cf",
+    "nonce": 2895612118595867443
+  },
+  {
+    "index": 1,
+    "timestamp": 1748850392,
+    "data": {
+      "ballotId": "683d56cc28a1b4032c25ea7e",
+      "choiceId": "683d56cc28a1b4032c25ea7f"
+    },
+    "prevHash": "000015f7ae2ccc448acde31f810536013a9c833b1124a61aaf8accd97882c3cf",
+    "hash": "00008c48b17197016caf1637e83fb23afb29059fff050c5cdd71195f61630ceb",
+    "nonce": 8659259831834232085
+  },
+  {
+    "index": 2,
+    "timestamp": 1748850697,
+    "data": {
+      "ballotId": "683d580128a1b4032c25eae2",
+      "choiceId": "683d580128a1b4032c25eae3"
+    },
+    "prevHash": "00008c48b17197016caf1637e83fb23afb29059fff050c5cdd71195f61630ceb",
+    "hash": "0000a6b8b04e0aa98b4d264d60d3861a42a505133c2f23eec03a64af247df66f",
+    "nonce": 2950908824948171791
+  },
+  {
+    "index": 3,
+    "timestamp": 1748850728,
+    "data": {
+      "ballotId": "683d582228a1b4032c25eb06",
+      "choiceId": "683d582228a1b4032c25eb07"
+    },
+    "prevHash": "0000a6b8b04e0aa98b4d264d60d3861a42a505133c2f23eec03a64af247df66f",
+    "hash": "00005a4b62cc429b3208bfdee11b64274003ab14a61ce42095914c11999c100e",
+    "nonce": 668415617582807050
+  }
+]

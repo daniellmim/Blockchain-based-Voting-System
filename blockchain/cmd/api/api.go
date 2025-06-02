@@ -176,10 +176,11 @@ func castVoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Broadcast the new block to peers
+	// Broadcast the entire blockchain to peers 
 	for _, peer := range network.KnownNodes {
 		if peer != nodeAddress {
-			network.SendBlock(peer, &newBlock)
+			// Send the full blockchain for this room to the peer
+			network.SendRoom(peer, req.RoomID, blockchain)
 		}
 	}
 

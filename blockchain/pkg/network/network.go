@@ -231,7 +231,17 @@ func handleBlock(payload []byte, blockchain *[]block.Block) {
 	defer mutex.Unlock()
 
 	if len(*blockchain) > 0 && newBlock.PrevHash != (*blockchain)[len(*blockchain)-1].Hash {
-		fmt.Println("Block does not link to chain. Ignored.")
+		fmt.Println("Block does not link to chain. Attempting to synchronize chain...")
+		// TODO: Request the full blockchain from the sender and replace local chain if longer and valid
+		// Example placeholder:
+		// senderAddr := newBlock.SourceAddr // You may need to include sender info in the block/network message
+		// receivedChain := RequestChainFromPeer(senderAddr)
+		// if len(receivedChain) > len(*blockchain) && block.ValidateBlockchain(receivedChain) {
+		//   *blockchain = receivedChain
+		//   fmt.Println("Chain synchronized with peer.")
+		// } else {
+		//   fmt.Println("Received chain is not valid or not longer. Ignoring block.")
+		// }
 		return
 	}
 
@@ -277,7 +287,7 @@ func SendAddr(addr string) {
 	sendData(addr, request)
 }
 
- // SendRoom sends a room's blockchain to a peer.
+// SendRoom sends a room's blockchain to a peer.
 func SendRoom(addr, roomID string, blockchain block.Blockchain) {
 	room := Room{RoomID: roomID, Blockchain: blockchain}
 	payload := GobEncode(room)
