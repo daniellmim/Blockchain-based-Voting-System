@@ -1,0 +1,57 @@
+[
+  {
+    "index": 0,
+    "timestamp": 1748890786,
+    "data": {
+      "ballotId": "genesis",
+      "choiceId": "genesis"
+    },
+    "prevHash": "0",
+    "hash": "0000af02fc2cd5fe8e0890b579c896dd293cc2818a9b1734b498637c7d113d06",
+    "nonce": 8102403742623406882
+  },
+  {
+    "index": 1,
+    "timestamp": 1748890824,
+    "data": {
+      "ballotId": "683df4be90e8478e5b9d3a02",
+      "choiceId": "683df4be90e8478e5b9d3a03"
+    },
+    "prevHash": "0000af02fc2cd5fe8e0890b579c896dd293cc2818a9b1734b498637c7d113d06",
+    "hash": "000040039592c9ec78b61ee3160ed86a3f8a546313f989bf8e9d3b8c7822067e",
+    "nonce": 7023928853741183638
+  },
+  {
+    "index": 2,
+    "timestamp": 1748891121,
+    "data": {
+      "ballotId": "683df5e64cd6cf41170ac164",
+      "choiceId": "683df5e64cd6cf41170ac165"
+    },
+    "prevHash": "000040039592c9ec78b61ee3160ed86a3f8a546313f989bf8e9d3b8c7822067e",
+    "hash": "0000bdad460c67fdc0dea4fe9f0004efc791696ba48873124e44fede4d96cf93",
+    "nonce": 3375332412461251220
+  },
+  {
+    "index": 3,
+    "timestamp": 1748891121,
+    "data": {
+      "ballotId": "683df5e64cd6cf41170ac164",
+      "choiceId": "683df5e64cd6cf41170ac166"
+    },
+    "prevHash": "0000bdad460c67fdc0dea4fe9f0004efc791696ba48873124e44fede4d96cf93",
+    "hash": "0000039ea81d8a63941e70f4f0a756acc5cb780da8ab8d3704217d1a691eee13",
+    "nonce": 5706586622059291823
+  },
+  {
+    "index": 4,
+    "timestamp": 1748891162,
+    "data": {
+      "ballotId": "683df60f4cd6cf41170ac184",
+      "choiceId": "683df60f4cd6cf41170ac185"
+    },
+    "prevHash": "0000039ea81d8a63941e70f4f0a756acc5cb780da8ab8d3704217d1a691eee13",
+    "hash": "00000cd547778c89d2f7ddf23aa928b21721a10d566d1c1b446ef6b7bc3a7f52",
+    "nonce": 2423287345234474340
+  }
+]

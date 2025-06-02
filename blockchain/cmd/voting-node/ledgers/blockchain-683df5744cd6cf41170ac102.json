@@ -1,0 +1,68 @@
+[
+  {
+    "index": 0,
+    "timestamp": 1748890996,
+    "data": {
+      "ballotId": "genesis",
+      "choiceId": "genesis"
+    },
+    "prevHash": "0",
+    "hash": "00009b914e4a1e84aecb70443371d9b58403ca1213751a7355412147adc901ae",
+    "nonce": 5478688510680439317
+  },
+  {
+    "index": 1,
+    "timestamp": 1748891040,
+    "data": {
+      "ballotId": "683df5864cd6cf41170ac111",
+      "choiceId": "683df5864cd6cf41170ac112"
+    },
+    "prevHash": "00009b914e4a1e84aecb70443371d9b58403ca1213751a7355412147adc901ae",
+    "hash": "0000d32b1d7473cdd78909f169772827273ab9ece9e492e412fe94c241f63b6d",
+    "nonce": 3196462672479789486
+  },
+  {
+    "index": 2,
+    "timestamp": 1748891040,
+    "data": {
+      "ballotId": "683df5864cd6cf41170ac111",
+      "choiceId": "683df5864cd6cf41170ac113"
+    },
+    "prevHash": "0000d32b1d7473cdd78909f169772827273ab9ece9e492e412fe94c241f63b6d",
+    "hash": "0000087bc0345b466c719a2a4f40d2dd6119faf0f836ccb2c3615f9daefe5f3d",
+    "nonce": 5275448569659538669
+  },
+  {
+    "index": 3,
+    "timestamp": 1748891208,
+    "data": {
+      "ballotId": "683df6414cd6cf41170ac1cb",
+      "choiceId": "683df6414cd6cf41170ac1cc"
+    },
+    "prevHash": "0000087bc0345b466c719a2a4f40d2dd6119faf0f836ccb2c3615f9daefe5f3d",
+    "hash": "000005004c0469103ef54bf7a9b0bc8a028e1bce90e86bbbc75ac5e411a743a1",
+    "nonce": 5817154834381645337
+  },
+  {
+    "index": 4,
+    "timestamp": 1748891211,
+    "data": {
+      "ballotId": "683df6414cd6cf41170ac1cb",
+      "choiceId": "683df6414cd6cf41170ac1ce"
+    },
+    "prevHash": "000005004c0469103ef54bf7a9b0bc8a028e1bce90e86bbbc75ac5e411a743a1",
+    "hash": "00000f8d4f444bb98e14ef7b2cb26aff40c3b23c56ece0de5de447180c503408",
+    "nonce": 5871700884953223426
+  },
+  {
+    "index": 5,
+    "timestamp": 1748891215,
+    "data": {
+      "ballotId": "683df6414cd6cf41170ac1cb",
+      "choiceId": "683df6414cd6cf41170ac1cf"
+    },
+    "prevHash": "00000f8d4f444bb98e14ef7b2cb26aff40c3b23c56ece0de5de447180c503408",
+    "hash": "00000c9e5862b630ac29904206ed69b357a08b0ce19003fc96705750b2960991",
+    "nonce": 624874636596328332
+  }
+]

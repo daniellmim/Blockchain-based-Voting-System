@@ -149,7 +149,7 @@ func castVoteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a new block for the vote
+	// Create a new block for the vote 
 	lastBlock := blockchain[len(blockchain)-1]
 	newBlock := block.Block{
 		Index:     lastBlock.Index + 1,
